@@ -173,18 +173,8 @@ def load_torch_weights(
         [
             (name, jnp.asarray(weight.detach().numpy()))
             for name, weight in saved_weights.items()
-            #if "running" not in name and "num_batches" not in name
         ]
     )
-
-    #bn_s = []
-    #for name, weight in saved_weights.items():
-    #    if "running_mean" in name:
-    #        bn_s.append(False)
-    #        bn_s.append(jnp.asarray(weight.detach().numpy()))
-    #    elif "running_var" in name:
-    #        bn_s.append(jnp.asarray(weight.detach().numpy()))
-    #bn_iterator = iter(bn_s)
 
     leaves, tree_def = jtu.tree_flatten(model)
 
@@ -194,27 +184,10 @@ def load_torch_weights(
             leaf.size == 1 and isinstance(leaf.item(), bool)
         ):
             (weight_name, new_weights) = next(weights_iterator)
-            print(weight_name)
             new_leaves.append(jnp.reshape(new_weights, leaf.shape))
         else:
             new_leaves.append(leaf)
 
     model = jtu.tree_unflatten(tree_def, new_leaves)
 
-    #def set_experimental(iter_bn, x):
-    #    def set_values(y):
-    #        if isinstance(y, eqx.nn.StateIndex):
-    #            current_val = next(iter_bn)
-    #            if isinstance(current_val, bool):
-    #                eqx.nn.set_state(y, jnp.asarray(False))
-    #            else:
-    #                running_mean, running_var = current_val, next(iter_bn)
-    #                eqx.nn.set_state(y, (running_mean, running_var))
-    #        return y
-
-    #    return jtu.tree_map(
-    #        set_values, x, is_leaf=lambda _: isinstance(_, eqx.experimental.StateIndex)
-    #    )
-
-    #model = jtu.tree_map(set_experimental, bn_iterator, model)
     return model
