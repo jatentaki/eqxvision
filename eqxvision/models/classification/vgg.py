@@ -1,7 +1,6 @@
 from typing import Any, cast, Dict, List, Optional, Union
 
 import equinox as eqx
-import equinox.experimental as eqex
 import equinox.nn as nn
 import jax
 import jax.nn as jnn
@@ -140,7 +139,7 @@ def _make_layers(
             if batch_norm:
                 layers += [
                     conv2d,
-                    eqex.BatchNorm(v, axis_name="batch"),
+                    nn.BatchNorm(v, axis_name="batch"),
                     nn.Lambda(jnn.relu),
                 ]
             else:
